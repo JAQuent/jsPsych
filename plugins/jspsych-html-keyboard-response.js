@@ -154,21 +154,19 @@ jsPsych.plugins["html-keyboard-response"] = (function() {
     }
 
   
-
-
     // end trial if trial_duration is set in absence of any response
     if (trial.trial_duration != null) {
       // choose whatever duration is longer: minimum_trial_duration (if set) or trial_duration
-      if(trial.minimum_trial_duration != null && trial.trial_duration > trial.minimum_trial_duration){
-        var maximum_trial_duration = trial.trial_duration;
-      } else {
+      if(trial.minimum_trial_duration != null && trial.trial_duration < trial.minimum_trial_duration){
         var maximum_trial_duration = trial.minimum_trial_duration;
+      } else {
+        var maximum_trial_duration = trial.trial_duration;
       }
 
       // Wait trial duration and end
       jsPsych.pluginAPI.setTimeout(function() {
         end_trial();
-      }, trial.maximum_trial_duration);
+      }, maximum_trial_duration);
     }
 
   };
