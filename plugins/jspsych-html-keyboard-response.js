@@ -54,12 +54,6 @@ jsPsych.plugins["html-keyboard-response"] = (function() {
         default: true,
         description: 'If true, trial will end when subject makes a response.'
       },
-      responses_ends_trial_after_stimulus_duration: {
-        type: jsPsych.plugins.parameterType.BOOL,
-        pretty_name: 'Response ends trial after stimulus_duration elapsed',
-        default: false,
-        description: 'If true, trial will end when subject makes a response and stimulus_duration elapsed. This will overwrite the arugment response_ends_trial.'
-      },
 
     }
   }
@@ -100,26 +94,11 @@ jsPsych.plugins["html-keyboard-response"] = (function() {
         response: response.key
       };
 
-      // if response_ends_trial_after_stimulus_duration is true and a response was made before stimulus_duration,
-      // then wait until the stimulus_duration is over before ending the trial
-      if (trial.response_ends_trial_after_stimulus_duration && response.rt != null && response.rt < trial.stimulus_duration) {
-        var remaining_time = trial.stimulus_duration - response.rt;
-        jsPsych.pluginAPI.setTimeout(function() {
-          // kill any remaining setTimeout handlers
-          jsPsych.pluginAPI.clearAllTimeouts();
-          // clear the display
-          display_element.innerHTML = '';
-          // move on to the next trial
-          jsPsych.finishTrial(trial_data);
-        }, remaining_time);
-      } else {
-        // kill any remaining setTimeout handlers
-        jsPsych.pluginAPI.clearAllTimeouts();
-        // clear the display
-        display_element.innerHTML = '';
-        // move on to the next trial
-        jsPsych.finishTrial(trial_data);
-      };
+      // clear the display
+      display_element.innerHTML = '';
+
+      // move on to the next trial
+      jsPsych.finishTrial(trial_data);
     };
 
     // function to handle responses by the subject
@@ -134,13 +113,6 @@ jsPsych.plugins["html-keyboard-response"] = (function() {
         response = info;
       }
 
-      // Automatically set response_ends_trial = true if responses_ends_trial_after_stimulus_duration is true
-      // responses_ends_trial_after_stimulus_duration therefore overwrites response_ends_trial. 
-      if(trial.responses_ends_trial_after_stimulus_duration){
-        trial.response_ends_trial = true;
-      }
-
-      // End trial
       if (trial.response_ends_trial) {
         end_trial();
       }
