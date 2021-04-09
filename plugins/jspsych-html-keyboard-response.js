@@ -54,6 +54,12 @@ jsPsych.plugins["html-keyboard-response"] = (function() {
         default: true,
         description: 'If true, trial will end when subject makes a response.'
       },
+      minimum_trial_duration: {
+        type: jsPsych.plugins.parameterType.BOOL,
+        pretty_name: 'Minimum duration of the trial',
+        default: null,
+        description: 'How long until a trial can end.'
+      },
 
     }
   }
@@ -78,10 +84,6 @@ jsPsych.plugins["html-keyboard-response"] = (function() {
 
     // function to end trial when it is time
     var end_trial = function() {
-
-      // kill any remaining setTimeout handlers
-      jsPsych.pluginAPI.clearAllTimeouts();
-
       // kill keyboard listeners
       if (typeof keyboardListener !== 'undefined') {
         jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
@@ -114,7 +116,22 @@ jsPsych.plugins["html-keyboard-response"] = (function() {
       }
 
       if (trial.response_ends_trial) {
-        end_trial();
+        // If minimum_trial_duration is not null & response is given earlier than minimum_trial_duration 
+        // then wait remainig time
+        if (trial.minimum_trial_duration != null && response.rt != null && response.rt < trial.minimum_trial_duration) {
+          var remaining_time = trial.minimum_trial_duration - response.rt;
+          jsPsych.pluginAPI.setTimeout(function() {
+            // kill any remaining setTimeout handlers
+            jsPsych.pluginAPI.clearAllTimeouts();
+
+            end_trial();
+          }, remaining_time);
+        } else {
+          // kill any remaining setTimeout handlers
+          jsPsych.pluginAPI.clearAllTimeouts();
+          
+          end_trial();;
+        };
       }
     };
 
@@ -136,11 +153,22 @@ jsPsych.plugins["html-keyboard-response"] = (function() {
       }, trial.stimulus_duration);
     }
 
-    // end trial if trial_duration is set
-    if (trial.trial_duration !== null) {
+  
+
+
+    // end trial if trial_duration is set in absence of any response
+    if (trial.trial_duration != null) {
+      // choose whatever duration is longer: minimum_trial_duration (if set) or trial_duration
+      if(trial.minimum_trial_duration != null && trial.trial_duration > trial.minimum_trial_duration){
+        var maximum_trial_duration = trial.trial_duration;
+      } else {
+        var maximum_trial_duration = trial.minimum_trial_duration;
+      }
+
+      // Wait trial duration and end
       jsPsych.pluginAPI.setTimeout(function() {
         end_trial();
-      }, trial.trial_duration);
+      }, trial.maximum_trial_duration);
     }
 
   };

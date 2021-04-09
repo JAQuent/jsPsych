@@ -30,8 +30,18 @@
     prompt: '<p>No response allowed. 2s wait.</p>'
   }
 
+  var trial_4 = {
+    type: 'html-keyboard-response',
+    stimulus: '<p style="color: pink; font-size: 48px; font-weight: bold;">ORANGE</p>',
+    choices: ['y', 'n'],
+    minimum_trial_duration: 5000,
+    response_ends_trial: true,
+    trial_duration: 10000,
+    prompt: '<p>Does the color match the word? (y or n; 10s time limit; stimulus stays on 5s)</p>'
+  }
+
   jsPsych.init({
-    timeline: [trial_1, trial_2, trial_3],
+    timeline: [trial_1, trial_2, trial_3, trial_4],
     on_finish: function() {
       jsPsych.data.displayData();
     },
